@@ -63,63 +63,79 @@
 </section>
 
 <!-- ABOUT -->
-<section class="section py-5">
+<section class="about section">
 <div class="container">
-    <p>About Me</p>
+
+<p><?php echo get_theme_mod('about_small_title', 'About Me'); ?></p>
 
 <h2 class="text-white mb-5">
-Passionate about building <span class="accent">great web</span> experiences
+<?php echo get_theme_mod('about_heading'); ?>
 </h2>
 
-<div class="row ">
+<div class="row">
 
 <!-- LEFT TEXT -->
 <div class="col-lg-6 mb-4 mb-lg-0">
- <div class="about_content">
- <p class="">
-With over 5 years of experience in web development, I specialize in creating responsive, user-friendly applications using modern technologies. My passion lies in turning complex problems into simple, beautiful solutions.
-
-I enjoy working across the full stack, from crafting intuitive front-end interfaces to building robust back-end architectures. When I'm not coding, you'll find me exploring new tech, contributing to open source, or writing about development best practices.
-</p>
-<button class="btn btn-outline-light">Learn More</button>
- </div>
+    <div class="about_content">
+        <p>
+            <?php echo get_theme_mod('about_description'); ?>
+        </p>
+        <a href="<?php echo esc_url(get_theme_mod('about_button_link', '#')); ?>" class="btn btn-outline-light">
+            Learn More
+        </a>
+    </div>
 </div>
 
-<!-- RIGHT CARDS -->
+<!-- RIGHT FEATURE CARDS -->
 <div class="col-lg-6">
 
-<!-- CARD 1 -->
+<?php
+$args = array(
+    'post_type' => 'feature',
+    'posts_per_page' => -1,
+);
+$query = new WP_Query($args);
+
+if($query->have_posts()):
+    while($query->have_posts()): $query->the_post();
+        $icon = get_post_meta(get_the_ID(), '_feature_icon', true);
+?>
+
+ <?php
+$args = array(
+    'post_type' => 'feature',
+    'posts_per_page' => -1,
+);
+$query = new WP_Query($args);
+
+if($query->have_posts()):
+    while($query->have_posts()): $query->the_post();
+
+        $icon     = get_post_meta(get_the_ID(), '_feature_icon', true);
+        $subtitle = get_post_meta(get_the_ID(), '_feature_subtitle', true);
+?>
+
 <div class="feature-card mb-4">
     <div class="icon-box">
-        <i class="fas fa-code"></i>
+        <i class="<?php echo esc_attr($icon); ?>"></i>
     </div>
     <div>
-        <h5>Clean Code</h5>
-        <p>Writing maintainable, scalable solutions</p>
+        <h5><?php the_title(); ?></h5>
+        <p><?php echo esc_html($subtitle); ?></p>
     </div>
 </div>
 
-<!-- CARD 2 -->
-<div class="feature-card mb-4">
-    <div class="icon-box">
-        <i class="fas fa-palette"></i>
-    </div>
-    <div>
-        <h5>Creative Design</h5>
-        <p>Pixel-perfect UI with great UX</p>
-    </div>
-</div>
+<?php
+    endwhile;
+    wp_reset_postdata();
+endif;
+?>
 
-<!-- CARD 3 -->
-<div class="feature-card">
-    <div class="icon-box">
-        <i class="fas fa-bolt"></i>
-    </div>
-    <div>
-        <h5>Performance</h5>
-        <p>Optimized for speed and efficiency</p>
-    </div>
-</div>
+<?php
+    endwhile;
+    wp_reset_postdata();
+endif;
+?>
 
 </div>
 </div>

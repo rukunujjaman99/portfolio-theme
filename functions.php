@@ -519,4 +519,167 @@ function ruku_customize_social_links($wp_customize) {
 }
 add_action('customize_register', 'ruku_customize_social_links');
 
+// about section content can also be added via the Customizer or hardcoded in the template files as needed.
+function ruku_customize_about_section($wp_customize) {
+
+    $wp_customize->add_section('about_section', array(
+        'title' => __('About Section', 'text_domain'),
+        'priority' => 40,
+    ));
+
+    // Small Title
+    $wp_customize->add_setting('about_small_title', array(
+        'default' => 'About Me',
+        'sanitize_callback' => 'sanitize_text_field',
+    ));
+
+    $wp_customize->add_control('about_small_title', array(
+        'label' => __('Small Title', 'text_domain'),
+        'section' => 'about_section',
+        'type' => 'text',
+    ));
+
+    // Heading
+    $wp_customize->add_setting('about_heading', array(
+        'default' => 'Passionate about building great web experiences',
+        'sanitize_callback' => 'sanitize_text_field',
+    ));
+
+    $wp_customize->add_control('about_heading', array(
+        'label' => __('Main Heading', 'text_domain'),
+        'section' => 'about_section',
+        'type' => 'text',
+    ));
+
+    // Description
+    $wp_customize->add_setting('about_description', array(
+        'default' => '',
+        'sanitize_callback' => 'sanitize_textarea_field',
+    ));
+
+    $wp_customize->add_control('about_description', array(
+        'label' => __('Description', 'text_domain'),
+        'section' => 'about_section',
+        'type' => 'textarea',
+    ));
+
+    // Button Link
+    $wp_customize->add_setting('about_button_link', array(
+        'default' => '#',
+        'sanitize_callback' => 'esc_url_raw',
+    ));
+
+    $wp_customize->add_control('about_button_link', array(
+        'label' => __('Button Link', 'text_domain'),
+        'section' => 'about_section',
+        'type' => 'url',
+    ));
+
+}
+add_action('customize_register', 'ruku_customize_about_section');
+
+
+// Register Feature CPT
+// Register Feature CPT
+function ruku_register_feature_cpt() {
+
+    register_post_type('feature', array(
+        'labels' => array(
+            'name' => 'Features',
+            'singular_name' => 'Feature',
+            'add_new' => 'Add New',
+            'add_new_item' => 'Add New Feature',
+            'edit_item' => 'Edit Feature',
+            'new_item' => 'New Feature',
+            'view_item' => 'View Feature',
+            'search_items' => 'Search Features',
+        ),
+        'public' => true,
+        'menu_icon' => 'dashicons-star-filled',
+        'supports' => array('title'), // editor not needed if using subtitle
+    ));
+
+}
+add_action('init', 'ruku_register_feature_cpt');
+
+// Add Meta Box
+function ruku_add_feature_meta_box() {
+    add_meta_box(
+        'ruku_feature_details',
+        'Feature Details',
+        'ruku_feature_icon_callback',
+        'feature',
+        'normal',
+        'high'
+    );
+}
+add_action('add_meta_boxes', 'ruku_add_feature_meta_box');
+
+
+function ruku_feature_icon_callback($post) {
+
+    // Security nonce
+    wp_nonce_field('ruku_feature_nonce_action', 'ruku_feature_nonce');
+
+    $icon     = get_post_meta($post->ID, '_feature_icon', true);
+    $subtitle = get_post_meta($post->ID, '_feature_subtitle', true);
+    ?>
+
+    <p>
+        <label><strong>Feature Icon (FontAwesome Class)</strong></label>
+        <input type="text"
+               name="feature_icon"
+               value="<?php echo esc_attr($icon); ?>"
+               style="width:100%;"
+               placeholder="fas fa-code">
+        <small>Example: fas fa-code</small>
+    </p>
+
+    <p>
+        <label><strong>Subtitle</strong></label>
+        <input type="text"
+               name="feature_subtitle"
+               value="<?php echo esc_attr($subtitle); ?>"
+               style="width:100%;"
+               placeholder="Writing maintainable, scalable solutions">
+    </p>
+
+    <?php
+}
+function ruku_save_feature_meta($post_id) {
+
+    // Verify nonce
+    if (!isset($_POST['ruku_feature_nonce']) ||
+        !wp_verify_nonce($_POST['ruku_feature_nonce'], 'ruku_feature_nonce_action')) {
+        return;
+    }
+
+    // Prevent autosave overwrite
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+        return;
+    }
+
+    // Check user permission
+    if (!current_user_can('edit_post', $post_id)) {
+        return;
+    }
+
+    if (isset($_POST['feature_icon'])) {
+        update_post_meta(
+            $post_id,
+            '_feature_icon',
+            sanitize_text_field($_POST['feature_icon'])
+        );
+    }
+
+    if (isset($_POST['feature_subtitle'])) {
+        update_post_meta(
+            $post_id,
+            '_feature_subtitle',
+            sanitize_text_field($_POST['feature_subtitle'])
+        );
+    }
+}
+add_action('save_post', 'ruku_save_feature_meta');
+
 ?>
